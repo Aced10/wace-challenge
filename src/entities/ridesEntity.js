@@ -31,7 +31,7 @@ const {
 const { randomNumber } = require("../helpers/utils");
 
 const newRide = async (riderId, rideData) => {
-  let { location } = rideData;
+  let location = rideData?.location;
 
   // Only for this case asign rider location
   if (!location) location = await getRiderLocation(riderId);
@@ -77,7 +77,7 @@ const newRide = async (riderId, rideData) => {
 };
 
 const findRide = async (rideId) => {
-  if (!userId) return { status: 400, message: "El ID del viaje es requerido!" };
+  if (!rideId) return { status: 400, message: "El ID del viaje es requerido!" };
   try {
     const ride = await ridesModel.findById(rideId);
     return {
@@ -103,8 +103,8 @@ const endRide = async (rideId, location) => {
     const endLocation = location;
     const ride = await ridesModel.findById(rideId);
     const totalDistanceKm = calculateDistance(
-      ride.startLocation.latitude,
-      ride.startLocation.longitude,
+      ride.startLocation?.latitude,
+      ride.startLocation?.longitude,
       endLocation.location.latitude,
       endLocation.location.longitude
     );
@@ -124,7 +124,6 @@ const endRide = async (rideId, location) => {
       installments: DEFAULT_INSTALLMENTS,
       sourceId: ride.paymentSourceId,
     });
-    console.log();
     if (status !== 200) return { status, message, data };
     ride.endLocation = endLocation.location;
     ride.endTime = endTime;

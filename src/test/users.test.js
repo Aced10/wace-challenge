@@ -11,7 +11,7 @@ const {
 jest.mock("../models/user");
 jest.mock("../helpers/handleBcrypt");
 
-describe("Users entity", () => {
+describe("Users", () => {
   describe("newUser", () => {
     test("returns 400 status if any required field is missing", async () => {
       // Arrange

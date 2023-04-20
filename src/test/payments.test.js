@@ -17,7 +17,7 @@ jest.mock("../models/payment.source");
 jest.mock("../models/transaction");
 jest.mock("../entities/waceEntity");
 
-describe("Payment entity", () => {
+describe("Payments", () => {
   describe("newPaymentSource", () => {
     afterEach(() => {
       jest.resetAllMocks();
@@ -168,7 +168,7 @@ describe("Payment entity", () => {
       jest.clearAllMocks();
     });
 
-    it("should create a new transaction and return its ID when given valid data", async () => {
+    test("should create a new transaction and return its ID when given valid data", async () => {
       const sourceId = "some-source-id";
       const amount = 1000;
       const currency = "COP";
@@ -207,18 +207,19 @@ describe("Payment entity", () => {
         currency,
         installments,
       });
-      console.log(result);
 
       expect(paymentSourceModel.findById).toHaveBeenCalledTimes(1);
       expect(paymentSourceModel.findById).toHaveBeenCalledWith(sourceId);
       expect(createTransaction).toHaveBeenCalledTimes(1);
       expect(createTransaction).toHaveBeenCalledWith({
-        ...paymentSource,
+        paymentSourceWomId: paymentSource.paymentSourceWomId,
+        customerEmail: paymentSource.customerEmail,
         amount,
         currency,
         paymentMethod: { installments },
         reference: expect.any(String),
       });
+
       expect(transactionModel.create).toHaveBeenCalledTimes(1);
       expect(transactionModel.create).toHaveBeenCalledWith(createdTransaction);
       expect(result).toEqual({
@@ -228,7 +229,7 @@ describe("Payment entity", () => {
       });
     });
 
-    it("should return a 400 error when missing required data", async () => {
+    test("should return a 400 error when missing required data", async () => {
       const result = await addTransaction({});
       expect(result).toEqual({
         status: 400,
@@ -237,7 +238,7 @@ describe("Payment entity", () => {
       });
     });
 
-    it("should return a 404 error when the payment source is not found", async () => {
+    test("should return a 404 error when the payment source is not found", async () => {
       paymentSourceModel.findById.mockResolvedValue(null);
       const result = await addTransaction({
         sourceId: "non-existent-source-id",
@@ -250,7 +251,7 @@ describe("Payment entity", () => {
       });
     });
 
-    it("should return an error when the transaction creation fails", async () => {
+    test("should return an error when the transaction creation fails", async () => {
       paymentSourceModel.findById.mockResolvedValue({});
       createTransaction.mockResolvedValue({ status: 500, data: {} });
       const { status } = await addTransaction({
